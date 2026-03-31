@@ -6,58 +6,65 @@
 <title>EL CORRALAZO</title>
 
 <style>
-body{margin:0;font-family:Arial;background:url('https://ccviva.com/sites/default/files/2024-06/Hamburguesas_El_Corral_Tunja.jpg') no-repeat center center fixed;background-size:cover;color:white}
-.overlay{background:rgba(0,0,0,0.7);min-height:100vh;padding:20px}
-header{text-align:center;background:#c0392b;padding:15px;border-radius:10px}
-button{padding:10px;margin:5px;border:none;border-radius:8px;background:#e74c3c;color:white;cursor:pointer}
-input{padding:8px;margin:5px;border-radius:5px;border:none}
-.card{background:#1c1c1c;padding:15px;margin:10px;border-radius:10px;display:inline-block;width:200px;vertical-align:top;text-align:center}
-.card img{width:100%;border-radius:10px}
+body{margin:0;font-family:'Segoe UI',Arial;background:url('https://ccviva.com/sites/default/files/2024-06/Hamburguesas_El_Corral_Tunja.jpg') no-repeat center center fixed;background-size:cover;color:white}
+.overlay{background:rgba(0,0,0,0.8);min-height:100vh;padding:20px}
+header{text-align:center;background:#c0392b;padding:20px;border-radius:15px;font-size:26px;font-weight:bold;letter-spacing:2px}
+button{padding:10px 15px;margin:5px;border:none;border-radius:10px;background:#e74c3c;color:white;cursor:pointer;transition:0.3s}
+button:hover{background:#ff5c4d;transform:scale(1.05)}
+input{padding:10px;margin:5px;border-radius:8px;border:none;width:200px}
+.card{background:#1c1c1c;padding:15px;margin:10px;border-radius:15px;display:inline-block;width:230px;vertical-align:top;text-align:center;box-shadow:0 0 15px rgba(0,0,0,0.6);transition:0.3s}
+.card:hover{transform:scale(1.05)}
+.card img{width:100%;border-radius:10px;height:140px;object-fit:cover}
 .hidden{display:none}
 .center{text-align:center}
 .grid{display:flex;flex-wrap:wrap;justify-content:center}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.badge{background:#f39c12;padding:6px 12px;border-radius:10px;font-size:14px}
 </style>
 </head>
 
 <body>
 <div class="overlay">
 
-<header>
-<h1>🍔 EL CORRALAZO</h1>
-</header>
+<header>🍔 EL CORRALAZO</header>
 
 <div id="mainMenu" class="center">
-<h2>Selecciona cómo ingresar</h2>
+<h2>Bienvenido</h2>
+<p>Selecciona tu rol</p>
 <button onclick="enterClient()">Cliente</button>
 <button onclick="showWorkerLogin()">Trabajador</button>
 <button onclick="showOwnerLogin()">Dueño</button>
 </div>
 
 <div id="workerLogin" class="hidden center">
+<h3>Acceso trabajador</h3>
 <input type="password" id="workerPass" placeholder="Contraseña">
 <button onclick="loginWorker()">Entrar</button>
 </div>
 
 <div id="ownerLogin" class="hidden center">
+<h3>Acceso dueño</h3>
 <input type="password" id="ownerPass" placeholder="Contraseña">
 <button onclick="loginOwner()">Entrar</button>
 </div>
 
 <div id="owner" class="hidden">
-<h2>👑 Dueño</h2>
-<input id="name" placeholder="Producto">
+<div class="topbar"><h2>👑 Panel Dueño</h2><button onclick="goHome()">Salir</button></div>
+
+<h3>Crear producto</h3>
+<input id="name" placeholder="Nombre">
 <input id="price" placeholder="Precio">
-<input id="img" placeholder="Link imagen (opcional)">
+<input id="img" placeholder="Link imagen">
 <input type="file" id="fileImg">
 <button onclick="addProduct()">Agregar</button>
 
 <h3>Promociones</h3>
-<input id="promo">
-<button onclick="addPromo()">Agregar Promo</button>
-<div id="promos"></div>
+<input id="promo" placeholder="Nueva promo">
+<button onclick="addPromo()">Agregar</button>
+<div id="promos" class="grid"></div>
 
 <h3>Reseñas</h3>
-<button onclick="toggleReviews()">Ver Reseñas</button>
+<button onclick="toggleReviews()">Mostrar / Ocultar</button>
 <div id="reviews" class="hidden"></div>
 
 <h3>Logs</h3>
@@ -65,17 +72,19 @@ input{padding:8px;margin:5px;border-radius:5px;border:none}
 </div>
 
 <div id="seller" class="hidden">
-<h2>💰 Trabajador</h2>
+<div class="topbar"><h2>💰 Panel Trabajador</h2><button onclick="goHome()">Salir</button></div>
 <div id="orders"></div>
 </div>
 
 <div id="client" class="hidden">
-<h2>🍔 Menú</h2>
+<div class="topbar"><h2>🍔 Menú</h2><span class="badge" id="cartCount">0 pedidos</span></div>
 <div id="menu" class="grid"></div>
 
-<h3>Reseñas</h3>
-<input id="reviewText">
+<h3>Dejar reseña</h3>
+<input id="reviewText" placeholder="Escribe tu opinión">
 <button onclick="addReview()">Enviar</button>
+
+<button onclick="goHome()">Salir</button>
 </div>
 
 <script>
@@ -86,109 +95,40 @@ let logs=[];
 let promos=[];
 let currentRole="";
 
-function log(t){
-logs.push(currentRole+" → "+t+" - "+new Date().toLocaleString());
-renderLogs();
-}
+function log(t){logs.push(currentRole+" → "+t+" - "+new Date().toLocaleTimeString());renderLogs()}
 
-function hideAll(){
-document.getElementById("mainMenu").classList.add("hidden");
-document.getElementById("workerLogin").classList.add("hidden");
-document.getElementById("ownerLogin").classList.add("hidden");
-}
+function hideAll(){["mainMenu","workerLogin","ownerLogin","owner","seller","client"].forEach(id=>document.getElementById(id).classList.add("hidden"))}
+function goHome(){hideAll();mainMenu.classList.remove("hidden")}
 
-function enterClient(){currentRole="Cliente";hideAll();document.getElementById("client").classList.remove("hidden");renderMenu();log("Ingreso")}
-function showWorkerLogin(){hideAll();document.getElementById("workerLogin").classList.remove("hidden")}
-function showOwnerLogin(){hideAll();document.getElementById("ownerLogin").classList.remove("hidden")}
+function enterClient(){currentRole="Cliente";hideAll();client.classList.remove("hidden");renderMenu();log("Ingreso")}
+function showWorkerLogin(){hideAll();workerLogin.classList.remove("hidden")}
+function showOwnerLogin(){hideAll();ownerLogin.classList.remove("hidden")}
 
-function loginWorker(){
-if(document.getElementById("workerPass").value==="combox3213"){
-currentRole="Trabajador";document.getElementById("workerLogin").classList.add("hidden");document.getElementById("seller").classList.remove("hidden");renderOrders();log("Ingreso")
-}else alert("Contraseña incorrecta")}
-
-function loginOwner(){
-if(document.getElementById("ownerPass").value==="salchipapita131k"){
-currentRole="Dueño";document.getElementById("ownerLogin").classList.add("hidden");document.getElementById("owner").classList.remove("hidden");log("Ingreso")
-}else alert("Contraseña incorrecta")}
+function loginWorker(){if(workerPass.value==="combox3213"){currentRole="Trabajador";hideAll();seller.classList.remove("hidden");renderOrders();log("Ingreso")}else alert("Contraseña incorrecta")}
+function loginOwner(){if(ownerPass.value==="salchipapita131k"){currentRole="Dueño";hideAll();owner.classList.remove("hidden");log("Ingreso")}else alert("Contraseña incorrecta")}
 
 function addProduct(){
-let name=document.getElementById("name").value;
-let price=document.getElementById("price").value;
-let img=document.getElementById("img").value;
-let file=document.getElementById("fileImg").files[0];
-
-if(file){
-let reader=new FileReader();
-reader.onload=function(e){
-products.push({name,price,img:e.target.result});
-renderMenu();
-};
-reader.readAsDataURL(file);
-}else{
-products.push({name,price,img});
-renderMenu();
-}
-log("Producto creado: "+name);
+let n=name.value; let p=price.value; let link=img.value; let file=fileImg.files[0];
+if(file){let r=new FileReader();r.onload=e=>{products.push({n,p,img:e.target.result});renderMenu()};r.readAsDataURL(file)}
+else{products.push({n,p,img:link});renderMenu()}
+log("Producto creado: "+n)
 }
 
-function addPromo(){
-let p=document.getElementById("promo").value;
-promos.push(p);
-renderPromos();
-log("Promo agregada")
-}
+function addPromo(){promos.push(promo.value);renderPromos();log("Promo agregada")}
+function deletePromo(i){promos.splice(i,1);renderPromos();log("Promo eliminada")}
+function renderPromos(){promos.innerHTML=promos.map((p,i)=>`<div class='card'>🔥 ${p}<br><button onclick='deletePromo(${i})'>Eliminar</button></div>`).join("")}
 
-function deletePromo(i){
-promos.splice(i,1);
-renderPromos();
-log("Promo eliminada")
-}
+function renderMenu(){menu.innerHTML=products.map((p,i)=>`<div class='card'>${p.img?`<img src='${p.img}'>`:""}<h3>${p.n}</h3><p>$${p.p}</p><button onclick='order(${i})'>Pedir</button></div>`).join("")}
 
-function renderPromos(){
-let h="";
-promos.forEach((x,i)=>h+=`<div class='card'>🔥 ${x}<br><button onclick='deletePromo(${i})'>Eliminar</button></div>`);
-document.getElementById("promos").innerHTML=h;
-}
+function order(i){orders.push(products[i]);cartCount.innerText=orders.length+" pedidos";log("Pedido: "+products[i].n)}
+function renderOrders(){orders.innerHTML=orders.map(o=>`<div class='card'>${o.n} - $${o.p}<br><button onclick='pay()'>Cobrar</button></div>`).join("")}
+function pay(){alert("Pago realizado");orders=[];renderOrders();cartCount.innerText="0 pedidos";log("Pago realizado")}
 
-function renderMenu(){
-let h="";
-products.forEach((x,i)=>h+=`<div class='card'>${x.img?`<img src='${x.img}'>`:""}<h3>${x.name}</h3><p>$${x.price}</p><button onclick='order(${i})'>Pedir</button></div>`);
-document.getElementById("menu").innerHTML=h;
-}
+function addReview(){reviews.push(reviewText.value);renderReviews();log("Reseña agregada")}
+function toggleReviews(){reviewsDiv=document.getElementById("reviews");reviewsDiv.classList.toggle("hidden");renderReviews()}
+function renderReviews(){reviews.innerHTML=reviews.map(r=>`<div class='card'>${r}</div>`).join("")}
 
-function order(i){orders.push(products[i]);log("Pedido: "+products[i].name)}
-
-function renderOrders(){
-let h="";
-orders.forEach(o=>h+=`<div class='card'>${o.name} - $${o.price} <button onclick='pay()'>Cobrar</button></div>`);
-document.getElementById("orders").innerHTML=h;
-}
-
-function pay(){alert("Pago realizado");log("Pago realizado")}
-
-function addReview(){
-let r=document.getElementById("reviewText").value;
-reviews.push(r);
-renderReviews();
-log("Reseña agregada")
-}
-
-function toggleReviews(){
-let div=document.getElementById("reviews");
-if(div.classList.contains("hidden")){div.classList.remove("hidden");renderReviews()}else{div.classList.add("hidden")}
-}
-
-function renderReviews(){
-let h="";
-reviews.forEach(r=>h+=`<div class='card'>${r}</div>`);
-document.getElementById("reviews").innerHTML=h;
-}
-
-function renderLogs(){
-let h="";
-logs.forEach(l=>h+=`<div class='card'>${l}</div>`);
-document.getElementById("logs").innerHTML=h;
-}
+function renderLogs(){logs.innerHTML=logs.map(l=>`<div class='card'>${l}</div>`).join("")}
 </script>
 
 </div>
