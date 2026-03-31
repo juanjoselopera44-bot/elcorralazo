@@ -3,20 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EL CORRALAZO</title>
+<title>EL CORRALAZO ULTRA PRO</title>
 
 <style>
-body{margin:0;font-family:Arial;background:url('https://ccviva.com/sites/default/files/2024-06/Hamburguesas_El_Corral_Tunja.jpg') no-repeat center center fixed;background-size:cover;color:white}
-.overlay{background:rgba(0,0,0,0.85);min-height:100vh;padding:20px}
-header{text-align:center;background:#c0392b;padding:20px;border-radius:15px;font-size:26px}
-button{padding:10px;margin:5px;border:none;border-radius:8px;background:#e74c3c;color:white;cursor:pointer}
+body{margin:0;font-family:'Segoe UI',Arial;background:url('https://ccviva.com/sites/default/files/2024-06/Hamburguesas_El_Corral_Tunja.jpg') no-repeat center center fixed;background-size:cover;color:white}
+.overlay{background:rgba(0,0,0,0.88);min-height:100vh;padding:20px}
+header{text-align:center;background:#c0392b;padding:20px;border-radius:15px;font-size:28px;font-weight:bold}
+button{padding:10px;margin:5px;border:none;border-radius:10px;background:#e74c3c;color:white;cursor:pointer}
 button:hover{background:#ff5c4d}
-input, select{padding:8px;margin:5px;border-radius:5px;border:none}
-.card{background:#1c1c1c;padding:15px;margin:10px;border-radius:10px;display:inline-block;width:230px;text-align:center}
-.card img{width:100%;height:130px;object-fit:cover;border-radius:10px}
+input,select{padding:8px;margin:5px;border-radius:5px;border:none}
+.card{background:#1c1c1c;padding:15px;margin:10px;border-radius:12px;display:inline-block;width:230px;text-align:center;transition:.2s}
+.card:hover{transform:scale(1.05)}
+.card img{width:100%;height:140px;object-fit:cover;border-radius:10px}
 .grid{display:flex;flex-wrap:wrap;justify-content:center}
 .hidden{display:none}
 .topbar{display:flex;justify-content:space-between}
+.badge{background:#f39c12;padding:5px 10px;border-radius:8px}
 </style>
 </head>
 
@@ -41,6 +43,7 @@ input, select{padding:8px;margin:5px;border-radius:5px;border:none}
 <button onclick="loginOwner()">Entrar</button>
 </div>
 
+<!-- DUEÑO -->
 <div id="owner" class="hidden">
 <div class="topbar"><h2>👑 Dueño</h2><button onclick="home()">Salir</button></div>
 
@@ -54,7 +57,7 @@ input, select{padding:8px;margin:5px;border-radius:5px;border:none}
 <h3>Promos</h3>
 <input id="promo">
 <button onclick="addPromo()">Agregar</button>
-<div id="promos"></div>
+<div id="promos" class="grid"></div>
 
 <h3>Reseñas</h3>
 <button onclick="toggleReviews()">Ver</button>
@@ -64,17 +67,19 @@ input, select{padding:8px;margin:5px;border-radius:5px;border:none}
 <div id="logs"></div>
 </div>
 
+<!-- TRABAJADOR -->
 <div id="seller" class="hidden">
 <div class="topbar"><h2>💰 Trabajador</h2><button onclick="home()">Salir</button></div>
 <div id="ordersBox"></div>
 </div>
 
+<!-- CLIENTE -->
 <div id="client" class="hidden">
-<div class="topbar"><h2>🍔 Menú</h2><span id="count">0</span></div>
+<div class="topbar"><h2>🍔 Menú</h2><span id="count" class="badge">0</span></div>
 <div id="menu" class="grid"></div>
 
 <h3>Reseña</h3>
-<input id="reviewText">
+<input id="reviewText" placeholder="Tu opinión">
 <select id="stars">
 <option value="1">⭐</option>
 <option value="2">⭐⭐</option>
@@ -91,65 +96,46 @@ input, select{padding:8px;margin:5px;border-radius:5px;border:none}
 let products=[], orders=[], reviews=[], promos=[], logs=[];
 let role="";
 
-function log(t){
-logs.push(role+" → "+t+" - "+new Date().toLocaleTimeString());
-renderLogs();
-}
+function log(t){logs.push(role+" → "+t+" - "+new Date().toLocaleTimeString());renderLogs()}
 
-function hideAll(){
-["mainMenu","workerLogin","ownerLogin","owner","seller","client"].forEach(id=>document.getElementById(id).classList.add("hidden"));
-}
+function hideAll(){["mainMenu","workerLogin","ownerLogin","owner","seller","client"].forEach(id=>document.getElementById(id).classList.add("hidden"))}
+function home(){hideAll();document.getElementById("mainMenu").classList.remove("hidden")}
 
-function home(){hideAll();document.getElementById("mainMenu").classList.remove("hidden");}
-
-function enterClient(){role="Cliente";hideAll();client.classList.remove("hidden");renderMenu();log("Ingreso");}
-function showWorker(){hideAll();workerLogin.classList.remove("hidden");}
-function showOwner(){hideAll();ownerLogin.classList.remove("hidden");}
+function enterClient(){role="Cliente";hideAll();document.getElementById("client").classList.remove("hidden");renderMenu();log("Ingreso")}
+function showWorker(){hideAll();document.getElementById("workerLogin").classList.remove("hidden")}
+function showOwner(){hideAll();document.getElementById("ownerLogin").classList.remove("hidden")}
 
 function loginWorker(){
 if(document.getElementById("workerPass").value==="combox3213"){
 role="Trabajador";
 hideAll();
-seller.classList.remove("hidden");
+document.getElementById("seller").classList.remove("hidden");
 renderOrders();
 log("Ingreso");
-}else alert("Error");
+}else alert("Error")
 }
 
 function loginOwner(){
 if(document.getElementById("ownerPass").value==="salchipapita131k"){
 role="Dueño";
 hideAll();
-owner.classList.remove("hidden");
+document.getElementById("owner").classList.remove("hidden");
 renderMenu();
 log("Ingreso");
-}else alert("Error");
+}else alert("Error")
 }
 
 function addProduct(){
-let n=document.getElementById("name").value;
-let p=document.getElementById("price").value;
-let d=document.getElementById("desc").value;
-let link=document.getElementById("img").value;
-let file=document.getElementById("fileImg").files[0];
+let n=name.value,p=price.value,d=desc.value,link=img.value,file=fileImg.files[0];
+if(n===""||p==="") return alert("Completa datos");
 
-if(file){
-let r=new FileReader();
-r.onload=e=>{products.push({n,p,d,img:e.target.result});renderMenu();};
-r.readAsDataURL(file);
-}else{
-products.push({n,p,d,img:link});
-renderMenu();
+if(file){let r=new FileReader();r.onload=e=>{products.push({n,p,d,img:e.target.result});renderMenu()};r.readAsDataURL(file)}
+else{products.push({n,p,d,img:link});renderMenu()}
+
+log("Producto creado: "+n)
 }
 
-log("Producto creado: "+n);
-}
-
-function deleteProduct(i){
-products.splice(i,1);
-renderMenu();
-log("Producto eliminado");
-}
+function deleteProduct(i){products.splice(i,1);renderMenu();log("Producto eliminado")}
 
 function renderMenu(){
 let html=products.map((x,i)=>`
@@ -159,7 +145,7 @@ ${x.img?`<img src="${x.img}">`:""}
 <p>${x.d}</p>
 <p>$${x.p}</p>
 <button onclick="order(${i})">Pedir</button>
-${role==="Dueño"?`<br><button onclick="deleteProduct(${i})">❌</button>`:""}
+${role==="Dueño"?`<button onclick="deleteProduct(${i})">❌</button>`:""}
 </div>`).join("");
 
 document.getElementById("menu").innerHTML=html;
@@ -169,54 +155,43 @@ function order(i){
 orders.push(products[i]);
 document.getElementById("count").innerText=orders.length;
 renderOrders();
-log("Pedido: "+products[i].n);
+log("Pedido: "+products[i].n)
 }
 
 function renderOrders(){
 let box=document.getElementById("ordersBox");
-if(orders.length===0){box.innerHTML="No hay pedidos";return;}
+if(!box) return;
 
-let html=orders.map((o,i)=>`
+if(orders.length===0){box.innerHTML="<p>No hay pedidos</p>";return}
+
+box.innerHTML=orders.map((o,i)=>`
 <div class='card'>
-${o.n}<br>$${o.p}
-<br><button onclick="pay(${i})">Cobrar</button>
+<h3>${o.n}</h3>
+<p>$${o.p}</p>
+<button onclick="pay(${i})">Cobrar</button>
 </div>`).join("");
-
-box.innerHTML=html;
 }
 
 function pay(i){
 orders.splice(i,1);
 renderOrders();
 document.getElementById("count").innerText=orders.length;
-log("Pago realizado");
+log("Pago realizado")
 }
 
-function addPromo(){
-promos.push(document.getElementById("promo").value);
-renderPromos();
-log("Promo creada");
-}
-
-function renderPromos(){
-let html=promos.map((p,i)=>`<div class='card'>🔥 ${p}<br><button onclick="removePromo(${i})">Eliminar</button></div>`).join("");
-document.getElementById("promos").innerHTML=html;
-}
-
-function removePromo(i){
-promos.splice(i,1);
-renderPromos();
-}
+function addPromo(){if(promo.value==="")return;promos.push(promo.value);renderPromos();promo.value="";log("Promo creada")}
+function renderPromos(){document.getElementById("promos").innerHTML=promos.map((p,i)=>`<div class='card'>🔥 ${p}<br><button onclick="removePromo(${i})">Eliminar</button></div>`).join("")}
+function removePromo(i){promos.splice(i,1);renderPromos()}
 
 function addReview(){
 let text=document.getElementById("reviewText").value;
 let star=document.getElementById("stars").value;
-if(text.trim()==="") return alert("Escribe algo");
+if(text.trim()==="") return alert("Escribe reseña");
 
-reviews.push("⭐".repeat(star)+" - "+text);
+reviews.push({text,star});
 document.getElementById("reviewText").value="";
 renderReviews();
-log("Reseña agregada");
+log("Reseña agregada")
 }
 
 function toggleReviews(){
@@ -227,14 +202,10 @@ renderReviews();
 
 function renderReviews(){
 let box=document.getElementById("reviewsBox");
-let html=reviews.map(r=>`<div class='card'>${r}</div>`).join("");
-box.innerHTML=html;
+box.innerHTML=reviews.map(r=>`<div class='card'>${"⭐".repeat(r.star)}<br>${r.text}</div>`).join("");
 }
 
-function renderLogs(){
-let html=logs.map(l=>`<div class='card'>${l}</div>`).join("");
-document.getElementById("logs").innerHTML=html;
-}
+function renderLogs(){document.getElementById("logs").innerHTML=logs.map(l=>`<div class='card'>${l}</div>`).join("")}
 </script>
 
 </div>
