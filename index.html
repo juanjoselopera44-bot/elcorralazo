@@ -93,8 +93,21 @@ input,select{padding:8px;margin:5px;border-radius:5px;border:none}
 </div>
 
 <script>
-let products=[], orders=[], reviews=[], promos=[], logs=[];
+// DATOS PERSISTENTES
+let products=JSON.parse(localStorage.getItem("products"))||[];
+let orders=JSON.parse(localStorage.getItem("orders"))||[];
+let reviews=JSON.parse(localStorage.getItem("reviews"))||[];
+let promos=JSON.parse(localStorage.getItem("promos"))||[];
+let logs=JSON.parse(localStorage.getItem("logs"))||[];
 let role="";
+
+function saveData(){
+localStorage.setItem("products",JSON.stringify(products));
+localStorage.setItem("orders",JSON.stringify(orders));
+localStorage.setItem("reviews",JSON.stringify(reviews));
+localStorage.setItem("promos",JSON.stringify(promos));
+localStorage.setItem("logs",JSON.stringify(logs));
+}
 
 function log(t){logs.push(role+" → "+t+" - "+new Date().toLocaleTimeString());renderLogs()}
 
@@ -129,13 +142,30 @@ function addProduct(){
 let n=name.value,p=price.value,d=desc.value,link=img.value,file=fileImg.files[0];
 if(n===""||p==="") return alert("Completa datos");
 
-if(file){let r=new FileReader();r.onload=e=>{products.push({n,p,d,img:e.target.result});renderMenu()};r.readAsDataURL(file)}
-else{products.push({n,p,d,img:link});renderMenu()}
+if(file){
+let r=new FileReader();
+r.onload=e=>{
+products.push({n,p,d,img:e.target.result});
+saveData();
+renderMenu();
+};
+r.readAsDataURL(file);
+}else{
+products.push({n,p,d,img:link});
+saveData();
+renderMenu();
+}
 
 log("Producto creado: "+n)
 }
 
-function deleteProduct(i){products.splice(i,1);renderMenu();log("Producto eliminado")}
+function deleteProduct(i){
+if(!confirm("¿Seguro que quieres eliminar este producto?")) return;
+products.splice(i,1);
+saveData();
+renderMenu();
+log("Producto eliminado");
+}
 
 function renderMenu(){
 let html=products.map((x,i)=>`
@@ -154,8 +184,9 @@ document.getElementById("menu").innerHTML=html;
 function order(i){
 orders.push(products[i]);
 document.getElementById("count").innerText=orders.length;
+saveData();
 renderOrders();
-log("Pedido: "+products[i].n)
+log("Pedido: "+products[i].n);
 }
 
 function renderOrders(){
@@ -174,14 +205,26 @@ box.innerHTML=orders.map((o,i)=>`
 
 function pay(i){
 orders.splice(i,1);
+saveData();
 renderOrders();
 document.getElementById("count").innerText=orders.length;
-log("Pago realizado")
+log("Pago realizado");
 }
 
-function addPromo(){if(promo.value==="")return;promos.push(promo.value);renderPromos();promo.value="";log("Promo creada")}
+function addPromo(){
+if(promo.value==="") return;
+promos.push(promo.value);
+saveData();
+renderPromos();
+promo.value="";
+log("Promo creada");
+}
 function renderPromos(){document.getElementById("promos").innerHTML=promos.map((p,i)=>`<div class='card'>🔥 ${p}<br><button onclick="removePromo(${i})">Eliminar</button></div>`).join("")}
-function removePromo(i){promos.splice(i,1);renderPromos()}
+function removePromo(i){
+promos.splice(i,1);
+saveData();
+renderPromos();
+}
 
 function addReview(){
 let text=document.getElementById("reviewText").value;
@@ -190,8 +233,9 @@ if(text.trim()==="") return alert("Escribe reseña");
 
 reviews.push({text,star});
 document.getElementById("reviewText").value="";
+saveData();
 renderReviews();
-log("Reseña agregada")
+log("Reseña agregada");
 }
 
 function toggleReviews(){
