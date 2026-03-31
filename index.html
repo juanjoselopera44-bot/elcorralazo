@@ -6,39 +6,14 @@
 <title>EL CORRALAZO</title>
 
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:url('https://ccviva.com/sites/default/files/2024-06/Hamburguesas_El_Corral_Tunja.jpg') no-repeat center center fixed;
-background-size:cover;
-color:white;
-}
-
-.overlay{background:rgba(0,0,0,0.8);min-height:100vh;padding:20px}
+body{margin:0;font-family:Arial;background:url('https://ccviva.com/sites/default/files/2024-06/Hamburguesas_El_Corral_Tunja.jpg') no-repeat center center fixed;background-size:cover;color:white}
+.overlay{background:rgba(0,0,0,0.85);min-height:100vh;padding:20px}
 header{text-align:center;background:#c0392b;padding:20px;border-radius:15px;font-size:26px}
-
 button{padding:10px;margin:5px;border:none;border-radius:8px;background:#e74c3c;color:white;cursor:pointer}
 button:hover{background:#ff5c4d}
-
 input, select{padding:8px;margin:5px;border-radius:5px;border:none}
-
-.card{
-background:#1c1c1c;
-padding:15px;
-margin:10px;
-border-radius:10px;
-display:inline-block;
-width:230px;
-text-align:center;
-}
-
-.card img{
-width:100%;
-height:130px;
-object-fit:cover;
-border-radius:10px;
-}
-
+.card{background:#1c1c1c;padding:15px;margin:10px;border-radius:10px;display:inline-block;width:230px;text-align:center}
+.card img{width:100%;height:130px;object-fit:cover;border-radius:10px}
 .grid{display:flex;flex-wrap:wrap;justify-content:center}
 .hidden{display:none}
 .topbar{display:flex;justify-content:space-between}
@@ -47,10 +22,8 @@ border-radius:10px;
 
 <body>
 <div class="overlay">
-
 <header>🍔 EL CORRALAZO</header>
 
-<!-- MENU -->
 <div id="mainMenu" class="center">
 <h2>Selecciona rol</h2>
 <button onclick="enterClient()">Cliente</button>
@@ -58,18 +31,16 @@ border-radius:10px;
 <button onclick="showOwner()">Dueño</button>
 </div>
 
-<!-- LOGIN -->
 <div id="workerLogin" class="hidden center">
-<input type="password" id="workerPass">
+<input type="password" id="workerPass" placeholder="Contraseña">
 <button onclick="loginWorker()">Entrar</button>
 </div>
 
 <div id="ownerLogin" class="hidden center">
-<input type="password" id="ownerPass">
+<input type="password" id="ownerPass" placeholder="Contraseña">
 <button onclick="loginOwner()">Entrar</button>
 </div>
 
-<!-- DUEÑO -->
 <div id="owner" class="hidden">
 <div class="topbar"><h2>👑 Dueño</h2><button onclick="home()">Salir</button></div>
 
@@ -93,13 +64,11 @@ border-radius:10px;
 <div id="logs"></div>
 </div>
 
-<!-- TRABAJADOR -->
 <div id="seller" class="hidden">
 <div class="topbar"><h2>💰 Trabajador</h2><button onclick="home()">Salir</button></div>
 <div id="ordersBox"></div>
 </div>
 
-<!-- CLIENTE -->
 <div id="client" class="hidden">
 <div class="topbar"><h2>🍔 Menú</h2><span id="count">0</span></div>
 <div id="menu" class="grid"></div>
@@ -128,17 +97,17 @@ renderLogs();
 }
 
 function hideAll(){
-["mainMenu","workerLogin","ownerLogin","owner","seller","client"].forEach(id=>document.getElementById(id).classList.add("hidden"))
+["mainMenu","workerLogin","ownerLogin","owner","seller","client"].forEach(id=>document.getElementById(id).classList.add("hidden"));
 }
 
-function home(){hideAll();mainMenu.classList.remove("hidden")}
+function home(){hideAll();document.getElementById("mainMenu").classList.remove("hidden");}
 
-function enterClient(){role="Cliente";hideAll();client.classList.remove("hidden");renderMenu();log("Ingreso")}
-function showWorker(){hideAll();workerLogin.classList.remove("hidden")}
-function showOwner(){hideAll();ownerLogin.classList.remove("hidden")}
+function enterClient(){role="Cliente";hideAll();client.classList.remove("hidden");renderMenu();log("Ingreso");}
+function showWorker(){hideAll();workerLogin.classList.remove("hidden");}
+function showOwner(){hideAll();ownerLogin.classList.remove("hidden");}
 
 function loginWorker(){
-if(workerPass.value==="combox3213"){
+if(document.getElementById("workerPass").value==="combox3213"){
 role="Trabajador";
 hideAll();
 seller.classList.remove("hidden");
@@ -148,23 +117,25 @@ log("Ingreso");
 }
 
 function loginOwner(){
-if(ownerPass.value==="salchipapita131k"){
+if(document.getElementById("ownerPass").value==="salchipapita131k"){
 role="Dueño";
 hideAll();
 owner.classList.remove("hidden");
+renderMenu();
 log("Ingreso");
 }else alert("Error");
 }
 
 function addProduct(){
-let n=name.value, p=price.value, d=desc.value, link=img.value, file=fileImg.files[0];
+let n=document.getElementById("name").value;
+let p=document.getElementById("price").value;
+let d=document.getElementById("desc").value;
+let link=document.getElementById("img").value;
+let file=document.getElementById("fileImg").files[0];
 
 if(file){
 let r=new FileReader();
-r.onload=e=>{
-products.push({n,p,d,img:e.target.result});
-renderMenu();
-};
+r.onload=e=>{products.push({n,p,d,img:e.target.result});renderMenu();};
 r.readAsDataURL(file);
 }else{
 products.push({n,p,d,img:link});
@@ -172,6 +143,12 @@ renderMenu();
 }
 
 log("Producto creado: "+n);
+}
+
+function deleteProduct(i){
+products.splice(i,1);
+renderMenu();
+log("Producto eliminado");
 }
 
 function renderMenu(){
@@ -182,9 +159,10 @@ ${x.img?`<img src="${x.img}">`:""}
 <p>${x.d}</p>
 <p>$${x.p}</p>
 <button onclick="order(${i})">Pedir</button>
+${role==="Dueño"?`<br><button onclick="deleteProduct(${i})">❌</button>`:""}
 </div>`).join("");
 
-menu.innerHTML=html;
+document.getElementById("menu").innerHTML=html;
 }
 
 function order(i){
@@ -195,36 +173,33 @@ log("Pedido: "+products[i].n);
 }
 
 function renderOrders(){
-let html=orders.map(o=>`
+let box=document.getElementById("ordersBox");
+if(orders.length===0){box.innerHTML="No hay pedidos";return;}
+
+let html=orders.map((o,i)=>`
 <div class='card'>
-${o.n} - $${o.p}
-<br><button onclick="pay()">Cobrar</button>
+${o.n}<br>$${o.p}
+<br><button onclick="pay(${i})">Cobrar</button>
 </div>`).join("");
 
-document.getElementById("ordersBox").innerHTML=html;
+box.innerHTML=html;
 }
 
-function pay(){
-alert("Pago hecho");
-orders=[];
+function pay(i){
+orders.splice(i,1);
 renderOrders();
-document.getElementById("count").innerText=0;
+document.getElementById("count").innerText=orders.length;
 log("Pago realizado");
 }
 
 function addPromo(){
-promos.push(promo.value);
+promos.push(document.getElementById("promo").value);
 renderPromos();
 log("Promo creada");
 }
 
 function renderPromos(){
-let html=promos.map((p,i)=>`
-<div class='card'>
-🔥 ${p}
-<br><button onclick="removePromo(${i})">Eliminar</button>
-</div>`).join("");
-
+let html=promos.map((p,i)=>`<div class='card'>🔥 ${p}<br><button onclick="removePromo(${i})">Eliminar</button></div>`).join("");
 document.getElementById("promos").innerHTML=html;
 }
 
@@ -234,21 +209,26 @@ renderPromos();
 }
 
 function addReview(){
-let text=reviewText.value;
-let star=stars.value;
+let text=document.getElementById("reviewText").value;
+let star=document.getElementById("stars").value;
+if(text.trim()==="") return alert("Escribe algo");
+
 reviews.push("⭐".repeat(star)+" - "+text);
+document.getElementById("reviewText").value="";
 renderReviews();
 log("Reseña agregada");
 }
 
 function toggleReviews(){
-reviewsBox.classList.toggle("hidden");
+let box=document.getElementById("reviewsBox");
+box.classList.toggle("hidden");
 renderReviews();
 }
 
 function renderReviews(){
+let box=document.getElementById("reviewsBox");
 let html=reviews.map(r=>`<div class='card'>${r}</div>`).join("");
-document.getElementById("reviewsBox").innerHTML=html;
+box.innerHTML=html;
 }
 
 function renderLogs(){
